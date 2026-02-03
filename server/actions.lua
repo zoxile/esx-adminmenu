@@ -1,9 +1,4 @@
-local Helpers = require('server.helpers')
-local BanCache = require('server.ban_cache')
--- ========================
---  TELEPORT (SERVER SIDE)
--- ========================
-
+--  TELEPORT
 RegisterNetEvent('esx-adminmenu:server:goto', function(data)
     local src = source
     if not Helpers.hasPermission(src) then return end
@@ -11,9 +6,11 @@ RegisterNetEvent('esx-adminmenu:server:goto', function(data)
     local targetId = tonumber(data.id)
     if not Helpers.isOnline(targetId) then return end
 
-    Helpers.getXPlayer(src).setCoords(
-        Helpers.getXPlayer(targetId).getCoords(true)
-    )
+    local admin = ESX.Player(src)
+    local target = ESX.Player(targetId)
+    if not admin or not target then return end
+
+    admin.setCoords(target.getCoords(true))
 end)
 
 RegisterNetEvent('esx-adminmenu:server:bring', function(data)
@@ -23,14 +20,14 @@ RegisterNetEvent('esx-adminmenu:server:bring', function(data)
     local targetId = tonumber(data.id)
     if not Helpers.isOnline(targetId) then return end
 
-    Helpers.getXPlayer(targetId).setCoords(
-        Helpers.getXPlayer(src).getCoords(true)
-    )
+    local admin = ESX.Player(src)
+    local target = ESX.Player(targetId)
+    if not admin or not target then return end
+
+    target.setCoords(admin.getCoords(true))
 end)
 
--- ========================
 --  SPECTATE
--- ========================
 
 RegisterNetEvent('esx-adminmenu:server:spectate', function(data)
     local src = source
@@ -39,46 +36,39 @@ RegisterNetEvent('esx-adminmenu:server:spectate', function(data)
     local targetId = tonumber(data.id)
     if not Helpers.isOnline(targetId) then return end
 
+    Helpers.stopSpectate(src)
+    TriggerClientEvent('esx-adminmenu:client:stopSpectate', src)
+
     Helpers.startSpectate(src, targetId)
     TriggerClientEvent('esx-adminmenu:client:startSpectate', src, targetId)
 end)
 
 RegisterNetEvent('esx-adminmenu:server:spectate:stop', function()
     local src = source
-
     Helpers.stopSpectate(src)
     TriggerClientEvent('esx-adminmenu:client:stopSpectate', src)
 end)
 
--- ========================
 --  KICK
--- ========================
 
 RegisterNetEvent('esx-adminmenu:server:kick', function(data)
     local src = source
     if not Helpers.hasPermission(src) then return end
-
     local target = tonumber(data.id)
     if not Helpers.isOnline(target) then return end
 
-    local xTarget = Helpers.getXPlayer(target)
-
-    MySQL.insert.await(
-        'INSERT INTO kicks (identifier, license, reason, kicked_by) VALUES (?, ?, ?, ?)',
-        {
-            xTarget.identifier,
-            xTarget.getIdentifier('license'),
+    local xTarget = ESX.Player(target)
+    if not xTarget then return end
+    MySQL.insert.await('INSERT INTO kicks (identifier, reason, kicked_by) VALUES (?, ?, ?)', {
+            ESX.GetIdentifier(xTarget.src),
             data.reason or 'Kicked by admin',
             GetPlayerName(src)
         }
     )
-
     DropPlayer(target, data.reason or 'Kicked by admin')
 end)
 
--- ========================
 --  BAN
--- ========================
 
 RegisterNetEvent('esx-adminmenu:server:ban', function(data)
     local src = source
@@ -87,17 +77,17 @@ RegisterNetEvent('esx-adminmenu:server:ban', function(data)
     local target = tonumber(data.id)
     if not Helpers.isOnline(target) then return end
 
-    local xTarget = Helpers.getXPlayer(target)
+    local xTarget = ESX.Player(target)
+    if not xTarget then return end
 
-    local expiresAt = data.duration
-        and os.date('%Y-%m-%d %H:%M:%S', os.time() + data.duration)
-        or nil
+    local expiresAt = data.duration and os.date('!%Y-%m-%d %H:%M:%S', os.time() + (data.duration * 60)) or nil
+
+    local identifier = ESX.GetIdentifier(xTarget.src)
 
     MySQL.insert.await(
-        'INSERT INTO bans (identifier, license, reason, banned_by, expires_at) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO bans (identifier, reason, banned_by, expires_at) VALUES (?, ?, ?, ?)',
         {
-            xTarget.identifier,
-            xTarget.getIdentifier('license'),
+            identifier,
             data.reason or 'Banned by admin',
             GetPlayerName(src),
             expiresAt
@@ -105,7 +95,7 @@ RegisterNetEvent('esx-adminmenu:server:ban', function(data)
     )
 
     BanCache.add({
-        identifier = xTarget.identifier,
+        identifier = identifier,
         reason = data.reason,
         expires_at = expiresAt
     })

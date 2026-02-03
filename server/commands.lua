@@ -1,17 +1,123 @@
-local Helpers = require('server.helpers')
+--  VEC2
 
 ESX.RegisterCommand('vec2', 'admin', function(xPlayer, args, showError)
-    if not xPlayer or xPlayer.source == 0 then return end
-    print('test')
+    if not xPlayer or xPlayer.source == 0 then
+        showError('Invalid player.')
+        return
+    end
+
+    if not Helpers.hasPermission(xPlayer.source) then
+        showError('You do not have permission to use this command.')
+        return
+    end
+
+    local ped = GetPlayerPed(xPlayer.source)
+    if ped == 0 then
+        showError('Failed to get player ped.')
+        return
+    end
+
+    local coords = GetEntityCoords(ped)
+
+    local text = string.format(
+        'vec2(%.2f, %.2f)',
+        coords.x,
+        coords.y
+    )
+
+    TriggerClientEvent('esx-adminmenu:client:copyToClipboard', xPlayer.source, text)
 end, false, {
-    help = 'Get vec2' 
+    help = 'Copy your current position as vec2(x, y)'
+})
+
+--  VEC3
+
+ESX.RegisterCommand('vec3', 'admin', function(xPlayer, args, showError)
+    if not xPlayer or xPlayer.source == 0 then
+        showError('Invalid player.')
+        return
+    end
+
+    if not Helpers.hasPermission(xPlayer.source) then
+        showError('You do not have permission to use this command.')
+        return
+    end
+
+    local ped = GetPlayerPed(xPlayer.source)
+    if ped == 0 then
+        showError('Failed to get player ped.')
+        return
+    end
+
+    local coords = GetEntityCoords(ped)
+
+    local text = string.format(
+        'vec3(%.2f, %.2f, %.2f)',
+        coords.x,
+        coords.y,
+        coords.z
+    )
+
+    TriggerClientEvent('esx-adminmenu:client:copyToClipboard', xPlayer.source, text)
+end, false, {
+    help = 'Copy your current position as vec3(x, y, z)'
+})
+
+--  VEC4
+
+ESX.RegisterCommand('vec4', 'admin', function(xPlayer, args, showError)
+    if not xPlayer or xPlayer.source == 0 then
+        showError('Invalid player.')
+        return
+    end
+
+    if not Helpers.hasPermission(xPlayer.source) then
+        showError('You do not have permission to use this command.')
+        return
+    end
+
+    local ped = GetPlayerPed(xPlayer.source)
+    if ped == 0 then
+        showError('Failed to get player ped.')
+        return
+    end
+
+    local coords = GetEntityCoords(ped)
+    local heading = GetEntityHeading(ped)
+
+    local text = string.format(
+        'vec4(%.2f, %.2f, %.2f, %.2f)',
+        coords.x,
+        coords.y,
+        coords.z,
+        heading
+    )
+
+    TriggerClientEvent('esx-adminmenu:client:copyToClipboard', xPlayer.source, text)
+end, false, {
+    help = 'Copy your current position as vec4(x, y, z, heading)'
 })
 
 ESX.RegisterCommand({'admin', 'adminmenu'}, 'group', function(xPlayer, args, showError)
-    if not xPlayer or xPlayer.source == 0 then return end
-    if not Helpers.hasPermission(xPlayer.source) then return end
+    if not xPlayer or xPlayer.source == 0 then
+        showError('Invalid player.')
+        return
+    end
 
-    TriggerClientEvent('esx-adminmenu:client:open', xPlayer.source)
+    if not Helpers.hasPermission(xPlayer.source) then
+        showError('You do not have permission to open the admin menu.')
+        return
+    end
+
+    local players = Helpers.getPlayerList() or {}
+
+    if #players == 0 then
+        showError('Admin menu cannot be opened. No players found.')
+        return
+    end
+
+    TriggerClientEvent('esx-adminmenu:client:open', xPlayer.source, players)
 end, true, {
     help = 'Opens the ESX Admin Menu'
 })
+

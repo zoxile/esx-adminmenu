@@ -1,14 +1,12 @@
 local ESX = exports.es_extended:getSharedObject()
-local BanCache = require('server.ban_cache')
 
-local Helpers = {}
+Helpers = {}
 local allowedGroups = {}
-local banCache = {}
 local Spectators = {}
 
 for group, allowed in pairs(Config.AllowedGroups) do
     if allowed then
-        table.insert(allowedGroups, group)
+        allowedGroups[#allowedGroups + 1] = group
     end
 end
 
@@ -22,21 +20,23 @@ function Helpers.getLastSeen(identifier)
         { identifier }
     )
 
-    if not result or not result.last_seen then
+    if not result?.last_seen then
         return nil
     end
 
     return result.last_seen
 end
 
-function Helpers.isBanned(identifiers)
-    for _, identifier in ipairs(identifiers) do
-        local ban = BanCache.get(identifier)
-        if ban then
-            return ban
-        end
+function Helpers.isBanned(identifier)
+    local ban = BanCache.get(identifier)
+    if ban then
+        return ban
     end
     return nil
+end
+
+function Helpers.getAllowedPermissions()
+    return allowedGroups
 end
 
 function Helpers.hasPermission(source)
@@ -44,17 +44,6 @@ function Helpers.hasPermission(source)
     if not xPlayer then return false end
 
     return Config.AllowedGroups[xPlayer.getGroup()] == true
-end
-
-function Helpers.getAllowedPermissions()
-    local xPlayer = ESX.GetPlayerFromId(source)
-    if not xPlayer then return false end
-
-    return allowedGroups
-end
-
-function Helpers.isPlayerOnline(source)
-    return GetPlayerName(source) ~= nil
 end
 
 local function getFormattedPlayTime(playtime)
@@ -67,43 +56,45 @@ end
 
 function Helpers.getPlayerList()
     local players = {}
+    local xPlayers = ESX.GetExtendedPlayers()
 
-    for _, src in ipairs(ESX.GetPlayers()) do
-        local xPlayer = ESX.GetPlayerFromId(src)
-        if xPlayer then
-            local ped = GetPlayerPed(src)
-            local coords = xPlayer.getCoords(true)
-            local playtime = getFormattedPlayTime(xPlayer.getPlayTime() or 0)
-            players[#players + 1] = {
-                status = 'online',
-                id = src,
-                name = xPlayer.getName(),
+    for i = 1, #xPlayers do
+        local xPlayer = xPlayers[i]
+        local src = xPlayer.source
 
-                cash = xPlayer.getMoney(),
-                bank = xPlayer.getAccount('bank').money,
-                alt_money = (xPlayer.getAccount('black_money') and xPlayer.getAccount('black_money').money) or 0,
+        local ped = GetPlayerPed(src)
+        local coords = xPlayer.getCoords(true)
+        local playtime = getFormattedPlayTime(xPlayer.getPlayTime() or 0)
 
-                health = GetEntityHealth(ped),
-                armor = GetPedArmour(ped),
+        players[#players + 1] = {
+            status = 'online', -- At the moment only online.
+            id = src,
+            name = xPlayer.getName(),
 
-                last_join = Helpers.getLastSeen(xPlayer.identifier),
+            cash = xPlayer.getMoney(),
+            bank = xPlayer.getAccount('bank').money,
+            alt_money = (xPlayer.getAccount('black_money') and xPlayer.getAccount('black_money').money) or 0,
 
-                identifier = xPlayer.identifier,
-                license = xPlayer.getIdentifier(),
+            health = math.floor((GetEntityHealth(ped) - 100) / 100 * 100),
+            armor = GetPedArmour(ped),
 
-                job = xPlayer.job?.name,
-                job_grade = xPlayer.job?.grade_label,
+            last_join = Helpers.getLastSeen(xPlayer.identifier),
 
-                gender = xPlayer.sex == 0 and 'm' or 'f',
+            identifier = xPlayer.identifier,
+            license = xPlayer.getIdentifier(),
 
-                play_time = playtime,
-                position = {
-                    x = coords.x,
-                    y = coords.y,
-                    z = coords.z
-                }
+            job = xPlayer.job?.name,
+            job_grade = xPlayer.job?.grade_label,
+
+            gender = xPlayer.sex == 0 and 'm' or 'f',
+
+            play_time = playtime,
+            position = {
+                x = coords.x,
+                y = coords.y,
+                z = coords.z
             }
-        end
+        }
     end
 
     return players

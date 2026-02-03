@@ -1,29 +1,18 @@
-RegisterNUICallback('goto', function(data, cb)
-    TriggerServerEvent('esx-adminmenu:server:goto', data)
-    cb({ success = true })
+local spectating = false
+
+RegisterNetEvent('esx-adminmenu:client:startSpectate', function(targetId)
+    local targetPlayer = GetPlayerFromServerId(targetId)
+    if targetPlayer == -1 then return end
+
+    spectating = true
+    NetworkSetInSpectatorMode(true, GetPlayerPed(targetPlayer))
 end)
 
-RegisterNUICallback('bring', function(data, cb)
-    TriggerServerEvent('esx-adminmenu:server:bring', data)
-    cb({ success = true })
-end)
+RegisterNetEvent('esx-adminmenu:client:stopSpectate', function()
+    if not spectating then return end
+    local ped = GetPlayerPed(-1)
+    NetworkSetInSpectatorMode(true, ped)
+    NetworkSetInSpectatorMode(false, ped)
 
-RegisterNUICallback('spectate', function(data, cb)
-    TriggerServerEvent('esx-adminmenu:server:spectate', data)
-    cb({ success = true })
-end)
-
-RegisterNUICallback('spectate:stop', function(_, cb)
-    TriggerServerEvent('esx-adminmenu:server:spectate:stop')
-    cb({ success = true })
-end)
-
-RegisterNUICallback('kick', function(data, cb)
-    TriggerServerEvent('esx-adminmenu:server:kick', data)
-    cb({ success = true })
-end)
-
-RegisterNUICallback('ban', function(data, cb)
-    TriggerServerEvent('esx-adminmenu:server:ban', data)
-    cb({ success = true })
+    spectating = false
 end)
