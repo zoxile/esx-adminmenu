@@ -1,18 +1,23 @@
 BanCache = {}
 local bans = {}
 
+
 function BanCache.load()
+    -- Clear existing cache for ex. command usage.
+    bans = {}
+
     local rows = MySQL.query.await('SELECT * FROM bans')
     if not rows then return end
 
     for i = 1, #rows do
         local ban = rows[i]
+        local identifier = ban.identifier
 
-        if not bans[ban.identifier] then
-            bans[ban.identifier] = {}
+        if not bans[identifier] then
+            bans[identifier] = {}
         end
 
-        bans[ban.identifier][#bans[ban.identifier] + 1] = ban
+        bans[identifier][#bans[identifier] + 1] = ban
     end
 end
 

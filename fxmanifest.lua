@@ -1,13 +1,15 @@
 fx_version 'cerulean'
 game 'gta5'
+lua54 'yes'
 
 description 'ESX Admin Menu'
 author 'ESX (Zox)'
-version '0.1.0'
+version '0.1.1'
 
 shared_scripts {
     '@es_extended/imports.lua',
     '@es_extended/locale.lua',
+    'locales/*.lua',
     'shared/*.lua'
 }
 

@@ -8,9 +8,10 @@ ESX.RegisterServerCallback('esx-adminmenu:server:getInitData', function(source, 
 
     local currentPlayers = GetNumPlayerIndices()
     local maxPlayers = GetConvarInt('sv_maxclients', 32)
+    local translations = Helpers.getTranslations()
 
     cb({
-        translations = {}, -- can be empty safely, not sure what to do here yet.
+        translations = translations, -- can be empty safely
         serverData = {
             currentPlayers = currentPlayers,
             maxPlayers = maxPlayers

@@ -1,6 +1,6 @@
 --  VEC2
-
-ESX.RegisterCommand('vec2', 'admin', function(xPlayer, args, showError)
+local allowedPermissions = Helpers.getAllowedPermissions()
+ESX.RegisterCommand('vec2', allowedPermissions, function(xPlayer, args, showError)
     if not xPlayer or xPlayer.source == 0 then
         showError('Invalid player.')
         return
@@ -32,7 +32,7 @@ end, false, {
 
 --  VEC3
 
-ESX.RegisterCommand('vec3', 'admin', function(xPlayer, args, showError)
+ESX.RegisterCommand('vec3', allowedPermissions, function(xPlayer, args, showError)
     if not xPlayer or xPlayer.source == 0 then
         showError('Invalid player.')
         return
@@ -65,7 +65,7 @@ end, false, {
 
 --  VEC4
 
-ESX.RegisterCommand('vec4', 'admin', function(xPlayer, args, showError)
+ESX.RegisterCommand('vec4', allowedPermissions, function(xPlayer, args, showError)
     if not xPlayer or xPlayer.source == 0 then
         showError('Invalid player.')
         return
@@ -98,7 +98,7 @@ end, false, {
     help = 'Copy your current position as vec4(x, y, z, heading)'
 })
 
-ESX.RegisterCommand({'admin', 'adminmenu'}, 'group', function(xPlayer, args, showError)
+ESX.RegisterCommand({allowedPermissions, 'adminmenu'}, allowedPermissions, function(xPlayer, args, showError)
     if not xPlayer or xPlayer.source == 0 then
         showError('Invalid player.')
         return
@@ -119,5 +119,21 @@ ESX.RegisterCommand({'admin', 'adminmenu'}, 'group', function(xPlayer, args, sho
     TriggerClientEvent('esx-adminmenu:client:open', xPlayer.source, players)
 end, true, {
     help = 'Opens the ESX Admin Menu'
+})
+
+ESX.RegisterCommand({'refreshbans', 'refreshbancache'}, allowedPermissions, function(xPlayer, args, showError)
+    if not xPlayer or xPlayer.source == 0 then
+        showError('Invalid player.')
+        return
+    end
+
+    if not Helpers.hasPermission(xPlayer.source) then
+        showError('You do not have permission to open the admin menu.')
+        return
+    end
+
+    
+end, true, {
+    help = 'Refreshes the ban cache if manual changes were made to the database.'
 })
 

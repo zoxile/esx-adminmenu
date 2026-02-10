@@ -29,24 +29,36 @@ end)
 
 --  SPECTATE
 
-RegisterNetEvent('esx-adminmenu:server:spectate', function(data)
+ESX.RegisterServerCallback('esx-adminmenu:server:spectate', function(source, cb)
     local src = source
-    if not Helpers.hasPermission(src) then return end
+    local isAdmin = Helpers.hasPermission(src)
+    if not isAdmin then
+        print('[esx-adminmenu] Malicious use by user', src, 'has been detected! (Spectating without permissions)')
+        cb({ src = src, isAdmin = isAdmin, err = 'Insufficient Permissions' })
+        return 
+    end
 
     local targetId = tonumber(data.id)
-    if not Helpers.isOnline(targetId) then return end
+    if not Helpers.isOnline(targetId) then
+        cb({ src = src, isAdmin = isAdmin, err = 'Player Not Online' })
+        return     
+    end
 
     Helpers.stopSpectate(src)
-    TriggerClientEvent('esx-adminmenu:client:stopSpectate', src)
-
     Helpers.startSpectate(src, targetId)
-    TriggerClientEvent('esx-adminmenu:client:startSpectate', src, targetId)
+    cb({ src = src, isAdmin = isAdmin, err = nil })
 end)
 
-RegisterNetEvent('esx-adminmenu:server:spectate:stop', function()
+ESX.RegisterServerCallback('esx-adminmenu:server:spectate:stop', function(source, cb)
     local src = source
+    local isAdmin = Helpers.hasPermission(src)
+    local err = nil
+    if not isAdmin then
+        print('[esx-adminmenu] Malicious use by user', src, 'has been detected! (Spectating without permissions)')
+        err = 'Insufficient Permissions, the usage of this action will be notified.'
+    end
     Helpers.stopSpectate(src)
-    TriggerClientEvent('esx-adminmenu:client:stopSpectate', src)
+    cb({ src = src, isAdmin = isAdmin, err = err })
 end)
 
 --  KICK

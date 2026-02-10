@@ -16,13 +16,31 @@ RegisterNUICallback('bring', function(data, cb)
 end)
 
 RegisterNUICallback('spectate', function(data, cb)
-    TriggerServerEvent('esx-adminmenu:server:spectate', data)
-    cb({ success = true })
+    ESX.TriggerServerCallback('esx-adminmenu:server:spectate', function(res, data)
+        if data.err then
+            print('[esx-adminmenu]', data.err)
+        end
+        if not res or not res.isAdmin then
+            cb({ success = false })
+            return
+        end
+        Spectate(data.id)
+        cb({ success = true })
+    end)
 end)
 
 RegisterNUICallback('spectate:stop', function(_, cb)
-    TriggerServerEvent('esx-adminmenu:server:spectate:stop')
-    cb({ success = true })
+    ESX.TriggerServerCallback('esx-adminmenu:server:spectate:stop', function(res, data)
+        if data.err then
+            print('[esx-adminmenu]', data.err)
+        end
+        if not res then
+            cb({ success = false })
+            return
+        end
+        StopSpectate()
+        cb({ success = true })
+    end)
 end)
 
 RegisterNUICallback('kick', function(data, cb)

@@ -15,10 +15,7 @@ function Helpers.isOnline(source)
 end
 
 function Helpers.getLastSeen(identifier)
-    local result = MySQL.single.await(
-        'SELECT last_seen FROM users WHERE identifier = ?',
-        { identifier }
-    )
+    local result = MySQL.single.await('SELECT last_seen FROM users WHERE identifier = ?', { identifier })
 
     if not result?.last_seen then
         return nil
@@ -114,6 +111,71 @@ end
 
 function Helpers.getSpectators()
     return Spectators
+end
+
+function Helpers.getTranslations()
+    local keys = {
+        'admin_menu',
+        'admin_menu_desc',
+        'search_anything',
+        'server_online',
+        'players',
+        'search_player',
+        'player_management',
+        'players_list',
+        'id',
+        'name',
+        'money',
+        'bank_money',
+        'black_money',
+        'health',
+        'armor',
+        'last_visited',
+        'gender',
+        'male',
+        'female',
+        'job',
+        'job_grade',
+        'license',
+        'identifier',
+        'play_time',
+        'position',
+        'player_information',
+        'information',
+        'teleport',
+        'bring',
+        'spectate',
+        'kick',
+        'ban',
+        'never',
+        'copied_to_clipboard',
+        'online',
+        'offline',
+        'player',
+        'reason',
+        'kick_reason_placeholder',
+        'ban_reason_placeholder',
+        'duration',
+        'minutes',
+        'hours',
+        'days',
+        'months',
+        'years',
+        'permanent',
+        'duration_desc',
+        'cancel',
+        'confirm',
+        'escape_spectate'
+    }
+
+    local out = {}
+
+    for i = 1, #keys do
+        local key = keys[i]
+        out[key] = Translate(key)
+    end
+
+    return out
 end
 
 return Helpers
