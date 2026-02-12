@@ -4,7 +4,7 @@ lua54 'yes'
 
 description 'ESX Admin Menu'
 author 'ESX (Zox)'
-version '0.1.1'
+version '0.1.2'
 
 shared_scripts {
     '@es_extended/imports.lua',

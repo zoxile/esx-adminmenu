@@ -1,30 +1,52 @@
 --  TELEPORT
-RegisterNetEvent('esx-adminmenu:server:goto', function(data)
+ESX.RegisterServerCallback('esx-adminmenu:server:goto', function(source, cb)
     local src = source
-    if not Helpers.hasPermission(src) then return end
+    if not Helpers.hasPermission(src) then 
+        print('[esx-adminmenu] Malicious use by user', src, 'has been detected! (Goto without permissions)')
+        cb({err = 'Insufficient Permissions', success = false, playerOnline = true})
+        return     
+    end
 
     local targetId = tonumber(data.id)
-    if not Helpers.isOnline(targetId) then return end
+    if not Helpers.isOnline(targetId) then 
+        cb({err = 'Target offline', success = false, playerOnline = false})
+        return 
+    end
 
     local admin = ESX.Player(src)
     local target = ESX.Player(targetId)
-    if not admin or not target then return end
-
+    if not admin or not target then
+        local targetExists = target ~= nil
+        cb({err = 'Admin or target not found', success = false, playerOnline = targetExists})
+        return 
+    end
     admin.setCoords(target.getCoords(true))
+    cb({success = true, playerOnline = true})
 end)
 
-RegisterNetEvent('esx-adminmenu:server:bring', function(data)
+ESX.RegisterServerCallback('esx-adminmenu:server:bring', function(source, cb)
     local src = source
-    if not Helpers.hasPermission(src) then return end
+    if not Helpers.hasPermission(src) then 
+        print('[esx-adminmenu] Malicious use by user', src, 'has been detected! (Bring without permissions)')
+        cb({err = 'Insufficient Permissions', success = false, playerOnline = true})
+        return     
+    end
 
     local targetId = tonumber(data.id)
-    if not Helpers.isOnline(targetId) then return end
+    if not Helpers.isOnline(targetId) then 
+        cb({err = 'Target offline', success = false, playerOnline = false})
+        return 
+    end
 
     local admin = ESX.Player(src)
     local target = ESX.Player(targetId)
-    if not admin or not target then return end
-
-    target.setCoords(admin.getCoords(true))
+    if not admin or not target then
+        local targetExists = target ~= nil
+        cb({err = 'Admin or target not found', success = false, playerOnline = targetExists})
+        return 
+    end
+    target.setCoords(target.getCoords(true))
+    cb({success = true, playerOnline = true})
 end)
 
 --  SPECTATE
@@ -62,15 +84,27 @@ ESX.RegisterServerCallback('esx-adminmenu:server:spectate:stop', function(source
 end)
 
 --  KICK
-
-RegisterNetEvent('esx-adminmenu:server:kick', function(data)
+ESX.RegisterServerCallback('esx-adminmenu:server:kick', function(source, cb)
     local src = source
-    if not Helpers.hasPermission(src) then return end
-    local target = tonumber(data.id)
-    if not Helpers.isOnline(target) then return end
+    if not Helpers.hasPermission(src) then 
+        print('[esx-adminmenu] Malicious use by user', src, 'has been detected! (Kick without permissions)')
+        cb({err = 'Insufficient Permissions', success = false, playerOnline = true})
+        return     
+    end
 
-    local xTarget = ESX.Player(target)
-    if not xTarget then return end
+    local targetId = tonumber(data.id)
+    if not Helpers.isOnline(targetId) then 
+        cb({err = 'Target offline', success = false, playerOnline = false})
+        return 
+    end
+
+    local admin = ESX.Player(src)
+    local target = ESX.Player(targetId)
+    if not admin or not target then
+        local targetExists = target ~= nil
+        cb({err = 'Admin or target not found', success = false, playerOnline = targetExists})
+        return 
+    end
     MySQL.insert.await('INSERT INTO kicks (identifier, reason, kicked_by) VALUES (?, ?, ?)', {
             ESX.GetIdentifier(xTarget.src),
             data.reason or 'Kicked by admin',
@@ -78,27 +112,37 @@ RegisterNetEvent('esx-adminmenu:server:kick', function(data)
         }
     )
     DropPlayer(target, data.reason or 'Kicked by admin')
+    cb({success = true, playerOnline = false})
 end)
 
 --  BAN
-
-RegisterNetEvent('esx-adminmenu:server:ban', function(data)
+ESX.RegisterServerCallback('esx-adminmenu:server:ban', function(source, cb)
     local src = source
-    if not Helpers.hasPermission(src) then return end
+    if not Helpers.hasPermission(src) then 
+        print('[esx-adminmenu] Malicious use by user', src, 'has been detected! (Ban without permissions)')
+        cb({err = 'Insufficient Permissions', success = false, playerOnline = true})
+        return     
+    end
 
-    local target = tonumber(data.id)
-    if not Helpers.isOnline(target) then return end
+    local targetId = tonumber(data.id)
+    if not Helpers.isOnline(targetId) then 
+        cb({err = 'Target offline', success = false, playerOnline = false})
+        return 
+    end
 
-    local xTarget = ESX.Player(target)
-    if not xTarget then return end
+    local admin = ESX.Player(src)
+    local target = ESX.Player(targetId)
+    if not admin or not target then
+        local targetExists = target ~= nil
+        cb({err = 'Admin or target not found', success = false, playerOnline = targetExists})
+        return 
+    end
 
     local expiresAt = data.duration and os.date('!%Y-%m-%d %H:%M:%S', os.time() + (data.duration * 60)) or nil
 
     local identifier = ESX.GetIdentifier(xTarget.src)
 
-    MySQL.insert.await(
-        'INSERT INTO bans (identifier, reason, banned_by, expires_at) VALUES (?, ?, ?, ?)',
-        {
+    MySQL.insert.await('INSERT INTO bans (identifier, reason, banned_by, expires_at) VALUES (?, ?, ?, ?)', {
             identifier,
             data.reason or 'Banned by admin',
             GetPlayerName(src),
@@ -113,5 +157,6 @@ RegisterNetEvent('esx-adminmenu:server:ban', function(data)
     })
 
     DropPlayer(target, data.reason or 'You are banned')
+    cb({success = true, playerOnline = false})
 end)
 
