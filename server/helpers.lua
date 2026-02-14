@@ -1,6 +1,7 @@
 local ESX = exports.es_extended:getSharedObject()
 
 Helpers = {}
+local translations = nil
 local allowedGroups = {}
 local Spectators = {}
 
@@ -8,6 +9,14 @@ for group, allowed in pairs(Config.AllowedGroups) do
     if allowed then
         allowedGroups[#allowedGroups + 1] = group
     end
+end
+
+local function getFormattedPlayTime(playtime)
+    if playtime == 0 or playtime < 0 then return 0 end
+    local days = math.floor(playtime / 86400)
+    local hours = math.floor((playtime % 86400) / 3600)
+    local minutes = math.floor((playtime % 3600) / 60)
+    return { days = days, hours = hours, minutes = minutes }
 end
 
 function Helpers.isOnline(source)
@@ -41,14 +50,6 @@ function Helpers.hasPermission(source)
     if not xPlayer then return false end
 
     return Config.AllowedGroups[xPlayer.getGroup()] == true
-end
-
-local function getFormattedPlayTime(playtime)
-    if playtime == 0 or playtime < 0 then return 0 end
-    local days = math.floor(playtime / 86400)
-    local hours = math.floor((playtime % 86400) / 3600)
-    local minutes = math.floor((playtime % 3600) / 60)
-    return { days = days, hours = hours, minutes = minutes }
 end
 
 function Helpers.getPlayerList()
@@ -114,68 +115,76 @@ function Helpers.getSpectators()
 end
 
 function Helpers.getTranslations()
-    local keys = {
-        'admin_menu',
-        'admin_menu_desc',
-        'search_anything',
-        'server_online',
-        'players',
-        'search_player',
-        'player_management',
-        'players_list',
-        'id',
-        'name',
-        'money',
-        'bank_money',
-        'black_money',
-        'health',
-        'armor',
-        'last_visited',
-        'gender',
-        'male',
-        'female',
-        'job',
-        'job_grade',
-        'license',
-        'identifier',
-        'play_time',
-        'position',
-        'player_information',
-        'information',
-        'teleport',
-        'bring',
-        'spectate',
-        'kick',
-        'ban',
-        'never',
-        'copied_to_clipboard',
-        'online',
-        'offline',
-        'player',
-        'reason',
-        'kick_reason_placeholder',
-        'ban_reason_placeholder',
-        'duration',
-        'minutes',
-        'hours',
-        'days',
-        'months',
-        'years',
-        'permanent',
-        'duration_desc',
-        'cancel',
-        'confirm',
-        'escape_spectate'
-    }
+    if not translations then
+        local keys = {
+            'admin_menu',
+            'admin_menu_desc',
+            'search_anything',
+            'server_online',
+            'players',
+            'search_player',
+            'player_management',
+            'players_list',
+            'id',
+            'name',
+            'money',
+            'bank_money',
+            'black_money',
+            'health',
+            'armor',
+            'last_visited',
+            'gender',
+            'male',
+            'female',
+            'job',
+            'job_grade',
+            'license',
+            'identifier',
+            'play_time',
+            'position',
+            'player_information',
+            'information',
+            'teleport',
+            'bring',
+            'spectate',
+            'kick',
+            'ban',
+            'never',
+            'copied_to_clipboard',
+            'online',
+            'offline',
+            'player',
+            'reason',
+            'kick_reason_placeholder',
+            'ban_reason_placeholder',
+            'duration',
+            'minutes',
+            'hours',
+            'days',
+            'months',
+            'years',
+            'permanent',
+            'duration_desc',
+            'cancel',
+            'confirm',
+            'escape_spectate',
+            'default_ban'
+        }
 
-    local out = {}
+        translations = {}
 
-    for i = 1, #keys do
-        local key = keys[i]
-        out[key] = Translate(key)
+        for i = 1, #keys do
+            local key = keys[i]
+            translations[key] = Translate(key)
+        end 
     end
 
-    return out
+    return translations
+end
+
+function Helpers.getTranslation(key)
+    if translations == nil then return 'Error, translations not found!' end
+    return translations[key]
 end
 
 return Helpers

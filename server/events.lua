@@ -11,11 +11,21 @@ AddEventHandler('playerConnecting', function(name, _, deferrals)
     local ban = Helpers.isBanned(identifier)
     Wait(1000)
     if ban then
-        deferrals.done(ban.reason or 'You are banned from this server')
+        local message = Helpers.getTranslation('default_ban')
+
+        if ban.reason then
+            message = message .. "\n" .. Helpers.getTranslation('reason').. " " .. ban.reason
+        end
+
+        if ban.remaining_formatted then
+            message = message .. "\n" .. Helpers.getTranslation('duration') .. " " .. ban.remaining_formatted
+        end
+
+        deferrals.done(message)
         return
     end
 
-    deferrals.update('Finalizing connection...')
+    deferrals.update(Helpers.getTranslation('finalizing_connection'))
     Wait(100)
 
     deferrals.done()

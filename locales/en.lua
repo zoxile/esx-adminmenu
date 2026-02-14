@@ -49,5 +49,7 @@ Locales['en'] = {
     ['duration_desc'] = 'Not entering a duration bans the user permanently.',
     ['cancel'] = 'Cancel',
     ['confirm'] = 'Confirm',
-    ['escape_spectate'] = 'Press [ESC] to stop spectating'
+    ['escape_spectate'] = 'Press [ESC] to stop spectating',
+    ['default_ban'] = 'You are banned from this server!',                           -- Fallback ban reason
+    ['finalizing_connection'] = 'Finalizing connection...',
 }

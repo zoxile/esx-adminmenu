@@ -1,6 +1,41 @@
 BanCache = {}
+local translations
 local bans = {}
 
+local function formatRemainingTime(seconds)
+    local yearSeconds  = 60 * 60 * 24 * 365
+    local weekSeconds  = 60 * 60 * 24 * 7
+    local daySeconds   = 60 * 60 * 24
+    local hourSeconds  = 60 * 60
+    local minuteSeconds = 60
+
+    local years = math.floor(seconds / yearSeconds)
+    seconds = seconds % yearSeconds
+
+    local weeks = math.floor(seconds / weekSeconds)
+    seconds = seconds % weekSeconds
+
+    local days = math.floor(seconds / daySeconds)
+    seconds = seconds % daySeconds
+
+    local hours = math.floor(seconds / hourSeconds)
+    seconds = seconds % hourSeconds
+
+    local minutes = math.floor(seconds / minuteSeconds)
+
+    local parts = {}
+
+    if years > 0 then table.insert(parts, years .. "y") end
+    if weeks > 0 then table.insert(parts, weeks .. "w") end
+    if days > 0 then table.insert(parts, days .. "d") end
+    if hours > 0 then table.insert(parts, hours .. "h") end
+    if minutes > 0 then table.insert(parts, minutes .. "m") end
+    if #parts == 0 then
+        table.insert(parts, "<1m")
+    end
+
+    return table.concat(parts, ", ")
+end
 
 function BanCache.load()
     -- Clear existing cache for ex. command usage.
@@ -57,9 +92,16 @@ function BanCache.get(identifier)
             if expires and now >= expires then
                 table.remove(list, i)
             else
+                if expires then
+                    local remaining = expires - now
+                    ban.remaining_seconds = remaining
+                    ban.remaining_formatted = Helpers.formatRemainingTime(remaining)
+                end
+
                 return ban
             end
         else
+            ban.remaining_formatted = Helper.getTranslation('permanent')
             return ban
         end
     end
