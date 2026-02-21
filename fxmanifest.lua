@@ -1,40 +1,41 @@
-fx_version 'cerulean'
-game 'gta5'
-lua54 'yes'
+fx_version("cerulean")
+game("gta5")
+lua54("yes")
 
-description 'ESX Admin Menu'
-author 'ESX (Zox)'
-version '0.1.3'
+author("ESX (Zox)")
+description("ESX Admin Menu")
+version("0.2.0")
 
-shared_scripts {
-    '@es_extended/imports.lua',
-    '@es_extended/locale.lua',
-    'locales/*.lua',
-    'shared/*.lua'
-}
+shared_scripts({
+	"@es_extended/imports.lua",
+	"@es_extended/locale.lua",
+	"locales/*.lua",
+	"shared/*.lua",
+})
 
-client_scripts {
-    'client/*.lua'
-}
+client_scripts({
+	"client/*.lua",
+})
 
-server_scripts {
-    '@oxmysql/lib/MySQL.lua',
-    'server/ban_cache.lua',
-    'server/helpers.lua',
-    'server/actions.lua',
-    'server/commands.lua',
-    'server/events.lua',
-    'server/main.lua'
-}
+server_scripts({
+	"@oxmysql/lib/MySQL.lua",
+	"server/ban_cache.lua",
+	"server/database.lua",
+	"server/helpers.lua",
+	"server/actions.lua",
+	"server/commands.lua",
+	"server/events.lua",
+	"server/main.lua",
+})
 
-ui_page 'html/index.html'
+ui_page("html/index.html")
 
-files {
-    'html/index.html',
-    'html/**/*',
-}
+files({
+	"html/index.html",
+	"html/**/*",
+})
 
-dependencies {
-  'es_extended',
-  'oxmysql'
-}
+dependencies({
+	"es_extended",
+	"oxmysql",
+})
